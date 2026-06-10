@@ -1,1 +1,9 @@
-.
+services:
+  tomcat:
+    image: tomcat:latest
+    container_name: app-server
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./tomcat/webapps:/usr/local/tomcat/webapps
+    restart: unless-stopped
