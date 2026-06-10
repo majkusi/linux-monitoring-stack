@@ -1,0 +1,4 @@
+logs/*
+!logs/.gitkeep
+tomcat/webapps/*
+!tomcat/webapps/.gitkeep
