@@ -7,3 +7,14 @@ services:
     volumes:
       - ./tomcat/webapps:/usr/local/tomcat/webapps
     restart: unless-stopped
+  monitor:
+    image: monitor:latest
+    container_name: monitor
+    build:
+      context: ./monitor
+      dockerfile: dockerfile
+    volumes:
+      - ./logs:/logs
+    depends_on:
+      - tomcat
+    restart: unless-stopped
