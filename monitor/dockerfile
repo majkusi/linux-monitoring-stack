@@ -1,5 +1,5 @@
 FROM ubuntu:26.04
 RUN apt-get update && apt-get install -y curl
 COPY scripts/ /scripts/
-RUN chmod +x /scripts/health_check.sh
-CMD ["/scripts/health_check.sh"]
+RUN chmod +x /scripts/*.sh
+CMD ["/scripts/run_all.sh"]
