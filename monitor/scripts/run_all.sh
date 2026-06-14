@@ -3,5 +3,6 @@
 
 while true; do 
     /scripts/log_cleanup.sh
+    #sleep for a day
     sleep 86400
 done

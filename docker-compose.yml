@@ -18,3 +18,23 @@ services:
     depends_on:
       - tomcat
     restart: unless-stopped
+  db:
+    image: gvenzl/oracle-free:latest
+    container_name: oracle-db
+    environment: 
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      APP_USER: ${APP_USER}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
+    ports:
+      - 1521:1521
+    volumes:
+      - ./logs:/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+
