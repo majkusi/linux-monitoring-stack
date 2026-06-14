@@ -37,5 +37,24 @@ services:
       timeout: 10s
       retries: 10
       start_period: 30s
+  loader:
+    image: loader:latest
+    container_name: loader
+    build:
+      context: ./loader
+      dockerfile: dockerfile
+    environment: 
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+      APP_USER: ${APP_USER}
+      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
+      DB_HOST: db
+      DB_PORT: 1521
+      DB_SERVICE: FREEPDB1
+    volumes:
+      - ./logs:/logs
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
 
