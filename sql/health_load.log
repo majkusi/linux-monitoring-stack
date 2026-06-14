@@ -1,0 +1,54 @@
+
+SQL*Loader: Release 23.26.2.0.0 - Production on Sun Jun 14 11:56:57 2026
+Version 23.26.2.0.0
+
+Copyright (c) 1982, 2026, Oracle and/or its affiliates.  All rights reserved.
+
+Control File:   /sql/health.ctl
+Data File:      /logs/health-2026-06-14.log
+  Bad File:     /sql/health-2026-06-14.bad
+  Discard File:  none specified
+ 
+ (Allow all discards)
+
+Number to load: ALL
+Number to skip: 0
+Errors allowed: 50
+Bind array:     250 rows, maximum of 1048576 bytes
+Continuation:    none specified
+Path used:      Conventional
+
+Table METRICS, loaded from every logical record.
+Insert option in effect for this table: APPEND
+TRAILING NULLCOLS option in effect
+
+   Column Name                  Position   Len  Term Encl Datatype
+------------------------------ ---------- ----- ---- ---- ---------------------
+TIME_STAMP                          FIRST     *   ,       DATETIME YYYY-MM-DD HH24:MI:SS
+RAM_PCT                              NEXT     *   ,       CHARACTER            
+RAM_USED                             NEXT     *   ,       CHARACTER            
+RAM_TOTAL                            NEXT     *   ,       CHARACTER            
+DISK_PCT                             NEXT     *   ,       CHARACTER            
+CPU_PCT                              NEXT     *   ,       CHARACTER            
+
+
+Table METRICS:
+  6 Rows successfully loaded.
+  0 Rows not loaded due to data errors.
+  0 Rows not loaded because all WHEN clauses were failed.
+  0 Rows not loaded because all fields were null.
+
+
+Space allocated for bind array:                 387000 bytes(250 rows)
+Read   buffer bytes: 1048576
+
+Total logical records skipped:          0
+Total logical records read:             6
+Total logical records rejected:         0
+Total logical records discarded:        0
+
+Run began on Sun Jun 14 11:56:57 2026
+Run ended on Sun Jun 14 11:56:59 2026
+
+Elapsed time was:     00:00:01.97
+CPU time was:         00:00:00.02

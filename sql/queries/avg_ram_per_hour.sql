@@ -1,0 +1,5 @@
+SELECT TO_CHAR(trunc(TIME_STAMP, 'HH24'), 'YYYY-MM-DD HH24:MI') AS hour, 
+       avg(RAM_PCT) AS avg_ram_pct
+FROM METRICS
+GROUP BY trunc(TIME_STAMP, 'HH24')
+ORDER BY trunc(TIME_STAMP, 'HH24');

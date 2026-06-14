@@ -29,6 +29,7 @@ services:
       - 1521:1521
     volumes:
       - ./logs:/logs
+      - ./sql:/sql
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "healthcheck.sh"]

@@ -18,7 +18,7 @@ while true; do
     fi
 
     #DISK
-    disk_used=$(df -h / | awk 'NR==2{print $5}')
+    disk_used=$(df -h / | awk 'NR==2{print $5}' | tr -d '%')
     disk_value=$(echo "$disk_used" | tr -d '%')
     if [ "$disk_value" -gt "$DISK_THRESHOLD" ]; then
         echo "$timestamp,DISK ALERT: ${disk_value}% > ${DISK_THRESHOLD}%" >> /logs/alerts-${date_stamp}.log
