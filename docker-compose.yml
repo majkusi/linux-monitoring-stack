@@ -4,8 +4,11 @@ services:
     container_name: app-server
     ports:
       - "8080:8080"
+      - "8443:8443"
     volumes:
       - ./tomcat/webapps:/usr/local/tomcat/webapps
+      - ./tomcat/conf:/usr/local/tomcat/conf
+      - ./certs/generated:/certs
     restart: unless-stopped
   monitor:
     image: monitor:latest
@@ -15,13 +18,14 @@ services:
       dockerfile: dockerfile
     volumes:
       - ./logs:/logs
+      - ./certs/generated:/certs
     depends_on:
       - tomcat
     restart: unless-stopped
   db:
     image: gvenzl/oracle-free:latest
     container_name: oracle-db
-    environment: 
+    environment:
       ORACLE_PASSWORD: ${ORACLE_PASSWORD}
       APP_USER: ${APP_USER}
       APP_USER_PASSWORD: ${APP_USER_PASSWORD}
@@ -43,7 +47,7 @@ services:
     build:
       context: ./loader
       dockerfile: dockerfile
-    environment: 
+    environment:
       ORACLE_PASSWORD: ${ORACLE_PASSWORD}
       APP_USER: ${APP_USER}
       APP_USER_PASSWORD: ${APP_USER_PASSWORD}
@@ -56,5 +60,3 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-
-

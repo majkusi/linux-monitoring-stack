@@ -33,7 +33,18 @@ while true; do
 
     #LOGGING INTO FILE
     echo "$timestamp,$ram_percentage,$ram_used,$ram_total,$disk_used,$cpu_percentage" >> /logs/health-${date_stamp}.log
+
+    # HTTP health
     status=$(curl -s -o /dev/null -w "%{http_code}" http://tomcat:8080/)
     echo "$timestamp,$status" >> /logs/service-${date_stamp}.log
+
+    #MTLS error check 
+    mtls_status_error=$(curl -s -o /dev/null -w "%{http_code}" --cacert /certs/ca.crt https://tomcat:8443/   )
+    echo "$timestamp,$mtls_status_error" >> /logs/service-${date_stamp}.log
+    
+    #MTLS check 
+    mtls_status=$(curl -s -o /dev/null -w "%{http_code}" --cacert /certs/ca.crt --cert /certs/monitor.crt --key /certs/monitor.key https://tomcat:8443/)
+    echo "$timestamp,$mtls_status" >> /logs/service-${date_stamp}.log
+    
     sleep 60
 done

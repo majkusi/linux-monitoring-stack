@@ -14,4 +14,4 @@ openssl x509 -req -in ${OUT_DIR}monitor.csr -CA ${OUT_DIR}ca.crt -CAkey ${OUT_DI
 
 echo "Generating server certs..."
 openssl req -new -nodes -newkey rsa:2048 -keyout ${OUT_DIR}tomcat.key -out ${OUT_DIR}tomcat.csr -subj "//CN=tomcat"
-openssl x509  -extfile san.cnf -extensions v3_ext -req -in ${OUT_DIR}tomcat.csr -CA ${OUT_DIR}ca.crt -CAkey ${OUT_DIR}ca.key -out ${OUT_DIR}tomcat.crt
+openssl x509  -extfile ${OUT_DIR}san.cnf -extensions v3_ext -req -in ${OUT_DIR}tomcat.csr -CA ${OUT_DIR}ca.crt -CAkey ${OUT_DIR}ca.key -out ${OUT_DIR}tomcat.crt
