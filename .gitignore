@@ -1,5 +1,15 @@
+# logs
 logs/*
 !logs/.gitkeep
+
+# cert files
+*.crt
+*.key
+*.cnf
+*.key
+*.csr
+
+# misc
 tomcat/webapps/*
 !tomcat/webapps/.gitkeep
 .env
