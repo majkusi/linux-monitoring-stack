@@ -202,3 +202,28 @@ FETCH FIRST 5 ROWS ONLY;
 **Self-signed CA** — No public CA is used. Both containers mount `certs/generated/` and trust the same `ca.crt`. The CA private key (`ca.key`) is only needed to sign certs and is not mounted at runtime.
 
 **Secrets via `.env`** — Oracle passwords are passed through Docker Compose environment variables sourced from `.env`, which is gitignored.
+
+## TODO
+
+### Infrastructure
+
+- [ ] `init.sh` — single script setup (`.env`, certs, `docker-compose up`)
+- [ ] Nginx reverse proxy container (SSL termination, forward to Tomcat)
+- [ ] Log rotation script (compress old logs, delete after X days)
+
+### Backend
+
+- [ ] FastAPI container — REST endpoints (`/metrics`, `/status`) querying Oracle
+- [ ] SQL Views (`DAILY_SUMMARY`, etc.) as data layer for the API
+- [ ] Alert email sender (Python `smtplib`, triggers on threshold breach)
+- [ ] Daily report generator (HTML/PDF summary of metrics)
+
+### Frontend
+
+- [ ] React dashboard container — live charts (Chart.js) consuming FastAPI
+- [ ] Uptime indicator, CPU/RAM graphs, HTTP status history
+
+### Database
+
+- [ ] Oracle `DBMS_SCHEDULER` job for in-DB metric aggregation
+- [ ] Additional analytical queries (CPU vs HTTP errors correlation, peak alert hours)
