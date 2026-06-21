@@ -1,3 +1,11 @@
+x-db-environment: &db-environment
+  ORACLE_PASSWORD: ${ORACLE_PASSWORD}
+  APP_USER: ${APP_USER}
+  APP_USER_PASSWORD: ${APP_USER_PASSWORD}
+  DB_HOST: db
+  DB_PORT: 1521
+  DB_SERVICE: FREEPDB1
+
 services:
   tomcat:
     image: tomcat:latest
@@ -48,15 +56,24 @@ services:
       context: ./loader
       dockerfile: dockerfile
     environment:
-      ORACLE_PASSWORD: ${ORACLE_PASSWORD}
-      APP_USER: ${APP_USER}
-      APP_USER_PASSWORD: ${APP_USER_PASSWORD}
-      DB_HOST: db
-      DB_PORT: 1521
-      DB_SERVICE: FREEPDB1
+      <<: *db-environment
     volumes:
       - ./logs:/logs
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
+  api_dashboard:
+    image: api:latest
+    container_name: api_dashboard
+    build:
+      context: ./api
+      dockerfile: dockerfile
+    environment:
+      <<: *db-environment
+    volumes:
+      - ./api:/api
+    depends_on:
+      loader:
+        condition: service_started
     restart: unless-stopped
