@@ -3,11 +3,11 @@ import os
 import time
 import datetime
 
-db_user = os.environ.get("APP_USER")
-db_user_password = os.environ.get("APP_USER_PASSWORD")
-db_port = os.environ.get("DB_PORT")
-db_host = os.environ.get("DB_HOST")
-db_service = os.environ.get("DB_SERVICE")
+db_user = os.environ["APP_USER"]
+db_user_password = os.environ["APP_USER_PASSWORD"]
+db_port = os.environ["DB_PORT"]
+db_host = os.environ["DB_HOST"]
+db_service = os.environ["DB_SERVICE"]
 dsn = db_host + ":" + db_port + "/" + db_service
 
 def insert_into_db(connection, cursor, max_ts, input_file):
