@@ -1,5 +1,6 @@
 FROM python:3
-COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
-COPY python_api/ /api/
-CMD ["python","-u","api/loader.py"]
+WORKDIR /api
+COPY ./requirements.txt /api/requirements.txt
+RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
+COPY ./app /api/app
+CMD ["fastapi", "run", "app/main.py", "--port", "8000"]

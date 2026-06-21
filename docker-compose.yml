@@ -66,6 +66,8 @@ services:
   api_dashboard:
     image: api:latest
     container_name: api_dashboard
+    ports:
+      - "8000:8000"
     build:
       context: ./api
       dockerfile: dockerfile
