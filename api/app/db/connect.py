@@ -1,17 +1,17 @@
 import oracledb
 
 class Connect:
-    def __init__(self, db_user: str, db_user_password: str, db_dsn: str):
-        self.db_user = db_user
-        self.db_user_password = db_user_password
-        self.db_dsn = db_dsn
+    def __init__(self, user: str, password: str, dsn: str):
+        self.user = user
+        self.password = password
+        self.dsn = dsn
         self.pool: oracledb.ConnectionPool | None = None
 
     def connect(self):
         self.pool = oracledb.create_pool(
-            user=self.db_user,
-            password=self.db_user_password,
-            dsn=self.db_dsn,
+            user=self.user,
+            password=self.password,
+            dsn=self.dsn,
         )
 
     def execute(self, query: str, params=None):
