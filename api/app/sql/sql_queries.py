@@ -1,12 +1,26 @@
 
 
 def avg_per_hour(metrics):
-    list_of_metrics=""
+    str_of_metrics=""
     for metric in metrics:
-        list_of_metrics += (f",avg({metric.upper()}) AS avg_{metric.lower()} " )
+        str_of_metrics += (f",avg({metric.upper()}) AS avg_{metric.lower()} " )
 
     return ("SELECT TO_CHAR(trunc(TIME_STAMP, 'HH24'), 'YYYY-MM-DD HH24:MI') AS hour "\
-            + list_of_metrics +
+            + str_of_metrics +
             "FROM METRICS "\
             "GROUP BY trunc(TIME_STAMP, 'HH24')"\
             "ORDER BY trunc(TIME_STAMP, 'HH24');")
+
+def count_http_errors_per_day():
+    return ("SELECT trunc(TIME_STAMP, 'DD') AS day, "
+            "COUNT(HTTP_STATUS) AS error_count "
+            "FROM STATUS "
+            "WHERE HTTP_STATUS != 200 "
+            "GROUP BY day "
+            "ORDER BY day;")
+
+def server_uptime_pct():
+    return ("SELECT successes, total, ROUND(successes/total * 100, 2) AS uptime_pct "
+            "FROM (SELECT SUM(CASE WHEN HTTP_STATUS = 200 THEN 1 ELSE 0 END) AS successes, "
+            "COUNT(*) AS total "
+            "FROM STATUS);")
