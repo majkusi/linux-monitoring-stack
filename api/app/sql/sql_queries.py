@@ -1,5 +1,3 @@
-
-
 def avg_per_hour(metrics):
     str_of_metrics=""
     for metric in metrics:
@@ -16,8 +14,8 @@ def count_http_errors_per_day():
             "COUNT(HTTP_STATUS) AS error_count "
             "FROM STATUS "
             "WHERE HTTP_STATUS != 200 "
-            "GROUP BY day "
-            "ORDER BY day;")
+            "GROUP BY trunc(TIME_STAMP, 'DD') "
+            "ORDER BY trunc(TIME_STAMP, 'DD');")
 
 def server_uptime_pct():
     return ("SELECT successes, total, ROUND(successes/total * 100, 2) AS uptime_pct "
