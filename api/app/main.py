@@ -33,17 +33,26 @@ async def get_metrics():
                    cpu_pct=r[5]) 
                    for r in rows]
 
-@app.get("/metrics/average/hourly/ram",response_model=AvgHourlyRam)
+@app.get("/metrics/average/hourly/ram",response_model=list[AvgHourlyRam])
 async def get_hourly_ram():
         avg = db.execute(avg_per_hour(["RAM_PCT","RAM_USED"]))
-        return AvgHourlyRam(time_stamp=avg[0][0],ram_pct=avg[0][1],ram_used=avg[0][2])
+        result = []
+        for record in avg:
+              result.append(AvgHourlyRam(time_stamp=record[0],ram_pct=record[1],ram_used=record[2]))
+        return result
 
-@app.get("/metrics/average/hourly/cpu",response_model=AvgHourlyCpu)
+@app.get("/metrics/average/hourly/cpu",response_model=list[AvgHourlyCpu])
 async def get_avg_hourly_cpu():
         avg = db.execute(avg_per_hour(["CPU_PCT"]))
-        return AvgHourlyCpu(time_stamp=avg[0][0],cpu_pct=avg[0][1])
+        result = []
+        for record in avg:
+              result.append(AvgHourlyCpu(time_stamp=record[0],cpu_pct=record[1]))
+        return result
 
-@app.get("/metrics/average/hourly/disk", response_model=AvgHourlyDisk)
+@app.get("/metrics/average/hourly/disk", response_model=list[AvgHourlyDisk])
 async def get_avg_hourly_disk():
       avg = db.execute(avg_per_hour(["DISK_PCT"]))
-      return AvgHourlyDisk(time_stamp=avg[0][0],disk_pct=avg[0][1])
+      result = []
+      for record in avg:
+            result.append(AvgHourlyDisk(time_stamp=record[0],disk_pct=record[1]))
+      return result
