@@ -4,7 +4,7 @@ A three-tier monitoring stack running on Docker Compose. A **monitor** agent col
 
 ## Architecture
 
-![Architecture](docs/architecture.svg)
+![Architecture](docs/architecture.svg?v=2)
 
 ## Tech Stack
 
