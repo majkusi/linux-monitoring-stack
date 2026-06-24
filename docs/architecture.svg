@@ -1,6 +1,6 @@
 <svg viewBox="0 0 720 460" xmlns="http://www.w3.org/2000/svg" role="img" font-family="ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace">
   <title>linux-monitoring-stack architecture diagram</title>
-  <desc>Three-tier architecture: Presentation tier (SQL queries), Application tier (monitor, tomcat, loader), Data tier (Oracle DB)</desc>
+  <desc>Three-tier architecture: Presentation tier (FastAPI REST API, SQL queries), Application tier (monitor, tomcat, loader), Data tier (Oracle DB)</desc>
 
   <defs>
     <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto">
@@ -20,8 +20,10 @@
   <!-- ── Presentation Tier ── -->
   <rect x="60" y="20" width="600" height="72" rx="10" fill="#f3f4f6" stroke="#e5e7eb" stroke-width="1.5"/>
   <text x="360" y="44" text-anchor="middle" font-size="11" font-weight="600" fill="#6b7280" letter-spacing="0.08em">PRESENTATION TIER</text>
-  <rect x="230" y="52" width="260" height="30" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
-  <text x="360" y="72" text-anchor="middle" font-size="12" fill="#111827">SQL queries · Oracle SQL*Plus</text>
+  <rect x="130" y="52" width="210" height="30" rx="6" fill="#ffffff" stroke="#8b5cf6" stroke-width="2"/>
+  <text x="235" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#8b5cf6">FastAPI REST · :8000</text>
+  <rect x="380" y="52" width="210" height="30" rx="6" fill="#ffffff" stroke="#e5e7eb" stroke-width="1.5"/>
+  <text x="485" y="72" text-anchor="middle" font-size="12" fill="#111827">SQL queries · SQL*Plus</text>
 
   <!-- vertical connector pres→app -->
   <line x1="360" y1="92" x2="360" y2="122" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrowhead)"/>

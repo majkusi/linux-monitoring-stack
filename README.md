@@ -1,6 +1,6 @@
 # linux-monitoring-stack
 
-A three-tier monitoring stack running on Docker Compose. A **monitor** agent collects system metrics and checks service health, a **loader** persists the data into an **Oracle** database, and **Tomcat** acts as the monitored application server. mTLS secures all HTTPS communication between the monitor and Tomcat.
+A three-tier monitoring stack running on Docker Compose. A **monitor** agent collects system metrics and checks service health, a **loader** persists the data into an **Oracle** database, a **FastAPI** service exposes that data as a REST API, and **Tomcat** acts as the monitored application server. mTLS secures all HTTPS communication between the monitor and Tomcat.
 
 ## Architecture
 
@@ -13,14 +13,28 @@ A three-tier monitoring stack running on Docker Compose. A **monitor** agent col
 | Application server | Apache Tomcat (latest)                           |
 | Monitoring agent   | Bash + curl                                      |
 | Database loader    | Python 3 + python-oracledb                       |
+| REST API           | Python 3 + FastAPI                               |
 | Database           | Oracle Database Free 23ai (`gvenzl/oracle-free`) |
 | Security           | mTLS with self-signed CA                         |
+| Tests / CI         | pytest + GitHub Actions                          |
 | Orchestration      | Docker Compose                                   |
 
 ## Project Structure
 
 ```
 linux-monitoring-stack/
+├── .github/
+│   └── workflows/
+│       └── test.yml           # CI — runs pytest on push & PR
+├── api/
+│   ├── dockerfile
+│   ├── requirements.txt
+│   ├── app/
+│   │   ├── main.py            # FastAPI app, endpoints, lifespan
+│   │   ├── db/connect.py      # Oracle connection pool wrapper
+│   │   ├── models/            # Pydantic response models
+│   │   └── sql/sql_queries.py # query builders for the endpoints
+│   └── tests/                 # pytest (FakeDb stub — no live Oracle)
 ├── certs/
 │   ├── generate-certs.sh      # generates CA, server, and client certs
 │   └── generated/             # output dir (gitignored)
@@ -112,6 +126,19 @@ Writes results to `/logs/` (shared Docker volume).
 
 Reads the log files every 60 seconds and inserts any rows newer than the latest `MAX(TIME_STAMP)` in the database. Creates the `METRICS` and `STATUS` tables on first run (idempotent — checks `USER_TABLES` before issuing `CREATE TABLE`).
 
+### api
+
+A FastAPI service (container `api_dashboard`, port **8000**) that reads from Oracle through a `python-oracledb` connection pool and returns the data as JSON. The pool is opened and closed in the FastAPI `lifespan`, and exposed to the route handlers via a `get_db` dependency.
+
+| Method & path                         | Returns                                      |
+| ------------------------------------- | -------------------------------------------- |
+| `GET /metrics`                        | Latest rows from `METRICS`                   |
+| `GET /metrics/average/hourly/ram`     | Hourly average RAM (`RAM_PCT`, `RAM_USED`)   |
+| `GET /metrics/average/hourly/cpu`     | Hourly average CPU (`CPU_PCT`)               |
+| `GET /metrics/average/hourly/disk`    | Hourly average disk (`DISK_PCT`)             |
+
+Interactive docs are auto-generated at `http://localhost:8000/docs`.
+
 ### mTLS
 
 The CA (`ca.crt`) is self-signed and shared by both Tomcat and the monitor container at runtime. `ca.key` is only needed during cert generation. Tomcat's `SSLHostConfig` has `certificateVerification="required"` — connections without a valid client cert are rejected.
@@ -193,6 +220,19 @@ ORDER BY CPU_PCT DESC
 FETCH FIRST 5 ROWS ONLY;
 ```
 
+## Tests & CI
+
+The API has unit tests (`api/tests/`) built on **pytest** and FastAPI's `TestClient`. The Oracle dependency is swapped out at test time via `app.dependency_overrides[get_db]`, which injects a `FakeDb` stub returning canned rows — so the tests run **without a live Oracle instance**. Environment variables that `main.py` reads at import time are set in `conftest.py` before the app is imported.
+
+Run them locally:
+
+```bash
+cd api
+python -m pytest -v
+```
+
+`.github/workflows/test.yml` runs the same suite on every push to `main` and on every pull request. Because the database is stubbed, CI only needs to `pip install -r api/requirements.txt` and run `pytest` — no Oracle service required.
+
 ## Design Decisions
 
 **Ephemeral database** — Oracle data is not persisted to a volume. Tables are recreated automatically on each startup via `check_if_table_exists()`. This is intentional for a dev/demo environment; adding a named volume to `docker-compose.yml` would make it persistent.
@@ -207,13 +247,15 @@ FETCH FIRST 5 ROWS ONLY;
 
 ### Infrastructure
 
+- [x] CI — GitHub Actions running pytest on push & PR
 - [ ] `init.sh` — single script setup (`.env`, certs, `docker-compose up`)
 - [ ] Nginx reverse proxy container (SSL termination, forward to Tomcat)
 - [ ] Log rotation script (compress old logs, delete after X days)
 
 ### Backend
 
-- [ ] FastAPI container — REST endpoints (`/metrics`, `/status`) querying Oracle
+- [x] FastAPI container — `/metrics` + hourly average endpoints (RAM / CPU / disk) querying Oracle
+- [ ] `/status` endpoint exposing the `STATUS` table
 - [ ] SQL Views (`DAILY_SUMMARY`, etc.) as data layer for the API
 - [ ] Alert email sender (Python `smtplib`, triggers on threshold breach)
 - [ ] Daily report generator (HTML/PDF summary of metrics)
