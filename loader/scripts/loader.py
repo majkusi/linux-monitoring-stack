@@ -31,6 +31,7 @@ def insert_into_db(connection, cursor, max_ts, input_file):
             connection.commit()
     except FileNotFoundError:
         print("File " + input_file + " does not exist" )
+        
 
 def check_if_table_exists(db_cursor, table_name):
     db_cursor.execute("SELECT COUNT(*) FROM USER_TABLES WHERE TABLE_NAME = :1",[table_name.upper()])
