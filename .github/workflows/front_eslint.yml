@@ -19,8 +19,8 @@ jobs:
         with:
           node-version: "24"
           cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: frontend/monitoring-frontend/package-lock.json
       - run: npm ci
-        working-directory: frontend
+        working-directory: frontend/monitoring-frontend
       - run: npm run lint
-        working-directory: frontend
+        working-directory: frontend/monitoring-frontend
