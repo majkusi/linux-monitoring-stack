@@ -1,0 +1,8 @@
+name: front_eslint
+
+on:
+  push:
+    paths: ["frontend/"]
+
+jobs:
+  lint:
