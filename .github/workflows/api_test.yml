@@ -5,14 +5,14 @@ on:
     branches: [main]
     paths:
       - "api/**"
-      - ".github/workflows/test.yml"
+      - ".github/workflows/api_test.yml"
   pull_request:
     paths:
       - "api/**"
-      - ".github/workflows/test.yml"
+      - ".github/workflows/api_test.yml"
 
 jobs:
-  test:
+  api_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
