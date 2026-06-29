@@ -8,6 +8,7 @@ from models.AvgHourlyCpu import AvgHourlyCpu
 from models.AvgHourlyDisk import AvgHourlyDisk
 from sql.sql_queries import avg_per_hour
 from fastapi import Depends
+from fastapi.middleware.cors import CORSMiddleware
 
 db = Connect(
     user=os.environ["APP_USER"],
@@ -26,6 +27,11 @@ async def lifespan(app:FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["GET"],
+)
 
 
 @app.get("/metrics", response_model=list[Metric])
