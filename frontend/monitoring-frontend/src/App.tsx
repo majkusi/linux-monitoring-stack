@@ -3,7 +3,7 @@ import StatCard from "./components/StatCard";
 import Header from "./components/Header";
 const App = () => {
   const [dataIsLoaded, setDataIsLoaded] = useState(false);
-  const url = "";
+  const url = "http://localhost:8000/metrics";
 
   useEffect(() => {
     fetch(url)
