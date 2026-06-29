@@ -1,16 +1,42 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "./components/StatCard";
 import Header from "./components/Header";
+
+interface StatResponse {
+  time_stamp: string;
+  ram_pct: number;
+  ram_used: number;
+  ram_total: number;
+  disk_pct: number;
+  cpu_pct: number;
+}
+
+interface StatusResponse {
+  time_stamp: string;
+  uptime_pct: number;
+  successes: number;
+  total: number;
+}
+
 const App = () => {
-  const [items, setItems] = useState([]);
+  const [resources, setResources] = useState<StatResponse[]>([]);
+  const [status, setStatus] = useState<StatusResponse[]>([]);
   const [dataIsLoaded, setDataIsLoaded] = useState(false);
-  const url = "http://localhost:8000/metrics";
+  const url = "http://localhost:8000/";
 
   useEffect(() => {
-    fetch(url)
+    fetch(url + "metrics/average/uptime")
       .then((res) => res.json())
       .then((json) => {
-        setItems(json);
+        setStatus(json);
+      });
+  }, []);
+
+  useEffect(() => {
+    fetch(url + "metrics")
+      .then((res) => res.json())
+      .then((json) => {
+        setResources(json);
         setDataIsLoaded(true);
       });
   }, []);
@@ -21,7 +47,7 @@ const App = () => {
       <div className="grid grid-cols-4 p-5 gap-4">
         <StatCard
           label="CPU"
-          value={92}
+          value={resources[0]?.cpu_pct ?? NaN}
           unit="%"
           threshold={90}
           threshold_text="threshold "
@@ -29,7 +55,7 @@ const App = () => {
 
         <StatCard
           label="RAM"
-          value={12.54}
+          value={resources[0]?.ram_pct ?? NaN}
           unit="%"
           threshold={90}
           threshold_text="threshold "
@@ -37,7 +63,7 @@ const App = () => {
 
         <StatCard
           label="Disk"
-          value={92}
+          value={resources[0]?.disk_pct ?? NaN}
           unit="%"
           threshold={90}
           threshold_text="threshold "
@@ -45,7 +71,7 @@ const App = () => {
 
         <StatCard
           label="Uptime"
-          value={92}
+          value={status.uptime_pct ?? NaN}
           unit="%"
           threshold={200}
           threshold_text="HTTP: "
