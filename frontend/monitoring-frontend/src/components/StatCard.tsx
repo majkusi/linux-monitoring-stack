@@ -9,7 +9,7 @@ interface StatProps {
 
 const StatCard = ({ label, value, unit, threshold }: StatProps) => {
   return (
-    <div className="bg-gray-800 rounded-xs w-xs">
+    <div className="bg-background min-h-screen">
       <h1>{label}</h1>
       <h1 className="color">
         {value}
