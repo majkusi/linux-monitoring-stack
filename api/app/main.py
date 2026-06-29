@@ -2,11 +2,12 @@ from fastapi import FastAPI
 from db.connect import Connect
 import os
 from contextlib import asynccontextmanager
+from models.AvgUptime import AvgUptime
 from models.Metric import Metric
 from models.AvgHourlyRam import AvgHourlyRam
 from models.AvgHourlyCpu import AvgHourlyCpu
 from models.AvgHourlyDisk import AvgHourlyDisk
-from sql.sql_queries import avg_per_hour
+from sql.sql_queries import avg_per_hour, server_uptime_pct
 from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -36,7 +37,7 @@ app.add_middleware(
 
 @app.get("/metrics", response_model=list[Metric])
 async def get_metrics(conn = Depends(get_db)):
-    rows = conn.execute("SELECT * FROM METRICS FETCH FIRST 5 ROWS ONLY")
+    rows = conn.execute("SELECT * FROM METRICS ORDER BY TIME_STAMP DESC FETCH FIRST 5 ROWS ONLY")
     return [Metric(time_stamp=r[0], 
                    ram_pct=r[1], 
                    ram_used=r[2], 
@@ -68,3 +69,8 @@ async def get_avg_hourly_disk(conn = Depends(get_db)):
       for record in avg:
             result.append(AvgHourlyDisk(time_stamp=record[0],disk_pct=record[1]))
       return result
+
+@app.get("/metrics/average/uptime", response_model=AvgUptime)
+async def get_avg_uptime(conn = Depends(get_db)):
+      avg = conn.execute(server_uptime_pct())
+      return AvgUptime(successes=avg[0][0],total=avg[0][1],uptime_pct=avg[0][2])

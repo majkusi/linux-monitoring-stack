@@ -7,7 +7,7 @@ def avg_per_hour(metrics):
             + str_of_metrics +
             "FROM METRICS "\
             "GROUP BY trunc(TIME_STAMP, 'HH24')"\
-            "ORDER BY trunc(TIME_STAMP, 'HH24');")
+            "ORDER BY trunc(TIME_STAMP, 'HH24')")
 
 def count_http_errors_per_day():
     return ("SELECT trunc(TIME_STAMP, 'DD') AS day, "
@@ -15,10 +15,11 @@ def count_http_errors_per_day():
             "FROM STATUS "
             "WHERE HTTP_STATUS != 200 "
             "GROUP BY trunc(TIME_STAMP, 'DD') "
-            "ORDER BY trunc(TIME_STAMP, 'DD');")
+            "ORDER BY trunc(TIME_STAMP, 'DD')")
 
 def server_uptime_pct():
-    return ("SELECT successes, total, ROUND(successes/total * 100, 2) AS uptime_pct "
-            "FROM (SELECT SUM(CASE WHEN HTTP_STATUS = 200 THEN 1 ELSE 0 END) AS successes, "
-            "COUNT(*) AS total "
-            "FROM STATUS);")
+    return ("SELECT SUM(CASE WHEN HTTP_STATUS BETWEEN 1 AND 499 THEN 1 ELSE 0 END) AS successes, "
+            "COUNT(*) AS total, "
+            "ROUND(SUM(CASE WHEN HTTP_STATUS BETWEEN 1 AND 499 THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) AS uptime_pct "
+            "FROM STATUS "
+            "WHERE HTTP_STATUS != 0")
