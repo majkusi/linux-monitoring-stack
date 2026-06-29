@@ -2,13 +2,15 @@ import React, { useEffect, useState } from "react";
 import StatCard from "./components/StatCard";
 import Header from "./components/Header";
 const App = () => {
+  const [items, setItems] = useState([]);
   const [dataIsLoaded, setDataIsLoaded] = useState(false);
   const url = "http://localhost:8000/metrics";
 
   useEffect(() => {
     fetch(url)
       .then((res) => res.json())
-      .then(() => {
+      .then((json) => {
+        setItems(json);
         setDataIsLoaded(true);
       });
   }, []);
