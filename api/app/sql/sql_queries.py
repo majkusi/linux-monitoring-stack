@@ -18,8 +18,7 @@ def count_http_errors_per_day():
             "ORDER BY trunc(TIME_STAMP, 'DD')")
 
 def server_uptime_pct():
-    return ("SELECT SUM(CASE WHEN HTTP_STATUS BETWEEN 1 AND 499 THEN 1 ELSE 0 END) AS successes, "
+    return ("SELECT NVL(SUM(CASE WHEN HTTP_STATUS != 0 THEN 1 ELSE 0 END), 0) AS successes, "
             "COUNT(*) AS total, "
-            "ROUND(SUM(CASE WHEN HTTP_STATUS BETWEEN 1 AND 499 THEN 1 ELSE 0 END) / COUNT(*) * 100, 2) AS uptime_pct "
-            "FROM STATUS "
-            "WHERE HTTP_STATUS != 0")
+            "NVL(ROUND(SUM(CASE WHEN HTTP_STATUS != 0 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100, 2), 0) AS uptime_pct "
+            "FROM STATUS")

@@ -25,9 +25,10 @@ def insert_into_db(connection, cursor, max_ts, input_file):
                 elif "service" in input_file:
                     if ts > max_ts:
                         cursor.execute(
-                                    "INSERT INTO STATUS (TIME_STAMP, HTTP_STATUS) " \
-                                    "VALUES (:1, :2)",
-                                    [ts, fields[1]])
+                                    "INSERT INTO STATUS (TIME_STAMP, HTTP_STATUS, MTLS_NO_CERT, MTLS_CERT )" \
+                                    "VALUES (:1, :2, :3, :4)",
+                                    [ts, fields[1], fields[2], fields[3]])
+
             connection.commit()
     except FileNotFoundError:
         print("File " + input_file + " does not exist" )
@@ -48,7 +49,9 @@ def check_if_table_exists(db_cursor, table_name):
         elif table_name.upper() == "STATUS":
             db_cursor.execute("CREATE TABLE STATUS (" \
             "TIME_STAMP  TIMESTAMP," \
-            "HTTP_STATUS NUMBER(5, 2))")
+            "HTTP_STATUS NUMBER(5, 2)," \
+            "MTLS_NO_CERT NUMBER(5, 2)," \
+            "MTLS_CERT NUMBER(5, 2)) ")
 
 with oracledb.connect(user=db_user,password=db_user_password,dsn=dsn) as connection:
     with connection.cursor() as cursor:
