@@ -37,7 +37,7 @@ app.add_middleware(
 
 @app.get("/metrics", response_model=list[Metric])
 async def get_metrics(conn = Depends(get_db)):
-    rows = conn.execute("SELECT * FROM METRICS ORDER BY TIME_STAMP DESC FETCH FIRST 5 ROWS ONLY")
+    rows = conn.execute("SELECT * FROM METRICS ORDER BY TIME_STAMP DESC WHERE TRUNC(TIME_STAMP) = TRUNC(SYSDATE)")
     return [Metric(time_stamp=r[0], 
                    ram_pct=r[1], 
                    ram_used=r[2], 
