@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import StatCard from "./components/StatCard";
 import Header from "./components/Header";
+import MetricsChart from "./components/MetricsChart";
 
 interface StatResponse {
   time_stamp: string;
@@ -42,46 +43,49 @@ const App = () => {
   }, []);
 
   return (
-    <div className="bg-background min-h-screen">
-      <Header isConnected={dataIsLoaded}></Header>
-      <div className="grid grid-cols-4 p-5 gap-4">
-        <StatCard
-          label="CPU"
-          value={resources[0]?.cpu_pct ?? 0}
-          unit="%"
-          threshold={90}
-          threshold_text="threshold "
-          showThresholdUnit={true}
-        ></StatCard>
+    <>
+      <div className="bg-background min-h-screen">
+        <Header isConnected={dataIsLoaded}></Header>
+        <div className="grid grid-cols-4 p-5 gap-4">
+          <StatCard
+            label="CPU"
+            value={resources[0]?.cpu_pct ?? 0}
+            unit="%"
+            threshold={90}
+            threshold_text="threshold "
+            showThresholdUnit={true}
+          ></StatCard>
 
-        <StatCard
-          label="RAM"
-          value={resources[0]?.ram_pct ?? 0}
-          unit="%"
-          threshold={90}
-          threshold_text="threshold "
-          showThresholdUnit={true}
-        ></StatCard>
+          <StatCard
+            label="RAM"
+            value={resources[0]?.ram_pct ?? 0}
+            unit="%"
+            threshold={90}
+            threshold_text="threshold "
+            showThresholdUnit={true}
+          ></StatCard>
 
-        <StatCard
-          label="Disk"
-          value={resources[0]?.disk_pct ?? 0}
-          unit="%"
-          threshold={90}
-          threshold_text="threshold "
-          showThresholdUnit={true}
-        ></StatCard>
+          <StatCard
+            label="Disk"
+            value={resources[0]?.disk_pct ?? 0}
+            unit="%"
+            threshold={90}
+            threshold_text="threshold "
+            showThresholdUnit={true}
+          ></StatCard>
 
-        <StatCard
-          label="Uptime"
-          value={status?.uptime_pct ?? 0}
-          unit="%"
-          threshold={8080}
-          threshold_text="HTTP: "
-          showThresholdUnit={false}
-        ></StatCard>
+          <StatCard
+            label="Uptime"
+            value={status?.uptime_pct ?? 0}
+            unit="%"
+            threshold={8080}
+            threshold_text="HTTP: "
+            showThresholdUnit={false}
+          ></StatCard>
+        </div>
       </div>
-    </div>
+      <MetricsChart />
+    </>
   );
 };
 

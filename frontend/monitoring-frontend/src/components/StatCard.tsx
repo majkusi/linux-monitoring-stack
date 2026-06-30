@@ -20,7 +20,7 @@ const StatCard = ({
   const color =
     value < 60
       ? "text-ok-status"
-      : value > threshold
+      : value >= threshold
         ? "text-error-status"
         : "text-warning-status";
   const showUnit = showThresholdUnit ? unit : "";
