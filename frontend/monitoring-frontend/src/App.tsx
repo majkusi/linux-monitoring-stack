@@ -43,10 +43,10 @@ const App = () => {
   }, []);
 
   return (
-    <>
-      <div className="bg-background min-h-screen">
+    <div className="bg-background min-h-screen">
+      <div className="bg-background min-h-screen ml-5 mr-5">
         <Header isConnected={dataIsLoaded}></Header>
-        <div className="grid grid-cols-4 p-5 gap-4">
+        <div className="grid grid-cols-4 pb-5 gap-4">
           <StatCard
             label="CPU"
             value={resources[0]?.cpu_pct ?? 0}
@@ -83,9 +83,9 @@ const App = () => {
             showThresholdUnit={false}
           ></StatCard>
         </div>
+        <MetricsChart />
       </div>
-      <MetricsChart />
-    </>
+    </div>
   );
 };
 

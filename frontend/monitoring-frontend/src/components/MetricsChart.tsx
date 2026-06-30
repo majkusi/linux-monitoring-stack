@@ -60,7 +60,8 @@ const MetricsChart = () => {
   }, [chartData]);
 
   return (
-    <div style={{ backgroundColor: "#13151f" }}>
+    <div className="bg-card-background p-3 rounded-xl">
+      <h1 className="text-main-text"> CPU & RAM - LAST 24H</h1>
       <canvas ref={canvasRef}></canvas>
     </div>
   );
