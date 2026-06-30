@@ -26,20 +26,28 @@ const App = () => {
   const url = "http://localhost:8000/";
 
   useEffect(() => {
-    fetch(url + "metrics/average/uptime")
-      .then((res) => res.json())
-      .then((json) => {
-        setStatus(json);
-      });
-  }, []);
-
-  useEffect(() => {
-    fetch(url + "metrics")
-      .then((res) => res.json())
-      .then((json) => {
-        setResources(json);
-        setDataIsLoaded(true);
-      });
+    const fetchStatus = () => {
+      fetch(url + "metrics/average/uptime")
+        .then((res) => res.json())
+        .then((json) => {
+          setStatus(json);
+        });
+    };
+    const fetchResources = () => {
+      fetch(url + "metrics")
+        .then((res) => res.json())
+        .then((json) => {
+          setResources(json);
+          setDataIsLoaded(true);
+        });
+    };
+    fetchResources();
+    fetchStatus();
+    const interval = setInterval(() => {
+      fetchResources();
+      fetchStatus();
+    }, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   return (

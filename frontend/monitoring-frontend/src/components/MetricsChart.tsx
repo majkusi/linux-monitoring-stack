@@ -14,12 +14,18 @@ const MetricsChart = () => {
   const chartRef = useRef<Chart | null>(null);
 
   const url = "http://localhost:8000/";
+
   useEffect(() => {
-    fetch(url + "metrics").then((res) =>
-      res.json().then((json) => {
-        setChartData(json);
-      }),
-    );
+    const fetchData = () => {
+      fetch(url + "metrics").then((res) =>
+        res.json().then((json) => {
+          setChartData(json);
+        }),
+      );
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 60000);
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
@@ -34,9 +40,14 @@ const MetricsChart = () => {
         data: {
           labels: timestamp,
           datasets: [
-            { label: "CPU", data: cpu, borderColor: "#d85a30" },
-            { label: "RAM", data: ram, borderColor: "#378add" },
-            { label: "DISK", data: disk, borderColor: "#bc37dd" },
+            { label: "CPU", data: cpu, borderColor: "#d85a30", pointRadius: 0 },
+            { label: "RAM", data: ram, borderColor: "#378add", pointRadius: 0 },
+            {
+              label: "DISK",
+              data: disk,
+              borderColor: "#bc37dd",
+              pointRadius: 0,
+            },
           ],
         },
         options: {
