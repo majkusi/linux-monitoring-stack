@@ -6,6 +6,7 @@ interface StatProps {
   unit: string;
   threshold: number;
   threshold_text: string;
+  showThresholdUnit: boolean;
 }
 
 const StatCard = ({
@@ -14,6 +15,7 @@ const StatCard = ({
   unit,
   threshold,
   threshold_text,
+  showThresholdUnit,
 }: StatProps) => {
   const color =
     value < 60
@@ -21,6 +23,8 @@ const StatCard = ({
       : value > threshold
         ? "text-error-status"
         : "text-warning-status";
+  const showUnit = showThresholdUnit ? unit : "";
+
   return (
     <div className="bg-card-background rounded-xl p-5 border-border-color">
       <p className="text-main-text">{label}</p>
@@ -32,7 +36,7 @@ const StatCard = ({
       <p className="text-muted-text">
         {threshold_text}
         {threshold}
-        {unit}
+        {showUnit}
       </p>
     </div>
   );

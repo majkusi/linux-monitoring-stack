@@ -20,7 +20,7 @@ interface StatusResponse {
 
 const App = () => {
   const [resources, setResources] = useState<StatResponse[]>([]);
-  const [status, setStatus] = useState<StatusResponse[]>([]);
+  const [status, setStatus] = useState<StatusResponse>();
   const [dataIsLoaded, setDataIsLoaded] = useState(false);
   const url = "http://localhost:8000/";
 
@@ -47,34 +47,38 @@ const App = () => {
       <div className="grid grid-cols-4 p-5 gap-4">
         <StatCard
           label="CPU"
-          value={resources[0]?.cpu_pct ?? NaN}
+          value={resources[0]?.cpu_pct ?? 0}
           unit="%"
           threshold={90}
           threshold_text="threshold "
+          showThresholdUnit={true}
         ></StatCard>
 
         <StatCard
           label="RAM"
-          value={resources[0]?.ram_pct ?? NaN}
+          value={resources[0]?.ram_pct ?? 0}
           unit="%"
           threshold={90}
           threshold_text="threshold "
+          showThresholdUnit={true}
         ></StatCard>
 
         <StatCard
           label="Disk"
-          value={resources[0]?.disk_pct ?? NaN}
+          value={resources[0]?.disk_pct ?? 0}
           unit="%"
           threshold={90}
           threshold_text="threshold "
+          showThresholdUnit={true}
         ></StatCard>
 
         <StatCard
           label="Uptime"
-          value={status.uptime_pct ?? NaN}
+          value={status?.uptime_pct ?? 0}
           unit="%"
-          threshold={200}
+          threshold={8080}
           threshold_text="HTTP: "
+          showThresholdUnit={false}
         ></StatCard>
       </div>
     </div>
