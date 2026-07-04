@@ -22,11 +22,7 @@ const StatCard = ({
   useThreshold,
 }: StatProps) => {
   const colorWithoutThreshold =
-    value > 60
-      ? "text-ok-status"
-      : value <= 60
-        ? "text-warning-status"
-        : "text-error-status";
+    value > 60 ? "text-ok-status" : "text-warning-status";
 
   const color = showReverseColor
     ? value > 60
