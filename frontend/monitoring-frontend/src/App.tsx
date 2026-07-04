@@ -62,6 +62,8 @@ const App = () => {
             threshold={90}
             threshold_text="threshold "
             showThresholdUnit={true}
+            showReverseColor={false}
+            useThreshold={true}
           ></StatCard>
 
           <StatCard
@@ -71,6 +73,8 @@ const App = () => {
             threshold={90}
             threshold_text="threshold "
             showThresholdUnit={true}
+            showReverseColor={false}
+            useThreshold={true}
           ></StatCard>
 
           <StatCard
@@ -80,6 +84,8 @@ const App = () => {
             threshold={90}
             threshold_text="threshold "
             showThresholdUnit={true}
+            showReverseColor={false}
+            useThreshold={true}
           ></StatCard>
 
           <StatCard
@@ -89,6 +95,8 @@ const App = () => {
             threshold={8080}
             threshold_text="HTTP: "
             showThresholdUnit={false}
+            showReverseColor={true}
+            useThreshold={false}
           ></StatCard>
         </div>
         <MetricsChart />

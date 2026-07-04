@@ -7,6 +7,8 @@ interface StatProps {
   threshold: number;
   threshold_text: string;
   showThresholdUnit: boolean;
+  showReverseColor: boolean;
+  useThreshold: boolean;
 }
 
 const StatCard = ({
@@ -16,9 +18,23 @@ const StatCard = ({
   threshold,
   threshold_text,
   showThresholdUnit,
+  showReverseColor,
+  useThreshold,
 }: StatProps) => {
-  const color =
-    value < 60
+  const colorWithoutThreshold =
+    value > 60
+      ? "text-ok-status"
+      : value <= 60
+        ? "text-warning-status"
+        : "text-error-status";
+
+  const color = showReverseColor
+    ? value > 60
+      ? "text-ok-status"
+      : value <= threshold
+        ? "text-warning-status"
+        : "text-error-status"
+    : value < 60
       ? "text-ok-status"
       : value >= threshold
         ? "text-error-status"
@@ -28,7 +44,7 @@ const StatCard = ({
   return (
     <div className="bg-card-background rounded-xl p-5 border-border-color">
       <p className="text-main-text">{label}</p>
-      <p className={`${color} text-4xl`}>
+      <p className={`${useThreshold ? color : colorWithoutThreshold} text-4xl`}>
         {value}
         {unit}
       </p>
