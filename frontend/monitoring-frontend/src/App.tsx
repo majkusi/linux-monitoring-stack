@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import StatCard from "./components/StatCard";
 import Header from "./components/Header";
 import MetricsChart from "./components/MetricsChart";
+import ServiceHealth from "./components/ServiceHealth";
 
 interface StatResponse {
   time_stamp: string;
@@ -100,6 +101,7 @@ const App = () => {
           ></StatCard>
         </div>
         <MetricsChart />
+        <ServiceHealth />
       </div>
     </div>
   );
