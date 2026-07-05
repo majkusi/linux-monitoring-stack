@@ -22,3 +22,8 @@ def server_uptime_pct():
             "COUNT(*) AS total, "
             "NVL(ROUND(SUM(CASE WHEN HTTP_STATUS != 0 THEN 1 ELSE 0 END) / NULLIF(COUNT(*), 0) * 100, 2), 0) AS uptime_pct "
             "FROM STATUS")
+
+def service_health_http():
+    return ("SELECT * FROM STATUS "
+    "ORDER BY TIME_STAMP DESC "
+    "FETCH FIRST 1 ROWS ONLY")

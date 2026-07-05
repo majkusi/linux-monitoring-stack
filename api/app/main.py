@@ -3,11 +3,12 @@ from db.connect import Connect
 import os
 from contextlib import asynccontextmanager
 from models.AvgUptime import AvgUptime
+from models.HttpResponses import HttpResponses
 from models.Metric import Metric
 from models.AvgHourlyRam import AvgHourlyRam
 from models.AvgHourlyCpu import AvgHourlyCpu
 from models.AvgHourlyDisk import AvgHourlyDisk
-from sql.sql_queries import avg_per_hour, server_uptime_pct
+from sql.sql_queries import avg_per_hour, server_uptime_pct, service_health_http
 from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -74,3 +75,8 @@ async def get_avg_hourly_disk(conn = Depends(get_db)):
 async def get_avg_uptime(conn = Depends(get_db)):
       avg = conn.execute(server_uptime_pct())
       return AvgUptime(successes=avg[0][0],total=avg[0][1],uptime_pct=avg[0][2])
+
+@app.get("/metrics/status/test_results", response_model=HttpResponses)
+async def get_status_test_results(conn = Depends(get_db)):
+      result = conn.execute(service_health_http())
+      return HttpResponses(time_stamp=result[0][0],http=result[0][1],mtls_no_cert=result[0][2],mtls_cert=result[0][3])
