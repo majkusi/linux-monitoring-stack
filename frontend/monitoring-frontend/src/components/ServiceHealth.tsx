@@ -39,7 +39,7 @@ const ServiceHealth = () => {
       <h1 className="text-main-text pb-5 pl-3"> SERVICE HEALTH</h1>
       <div className="m-1">
         <ServiceRow
-          title={"HTTP:200/404"}
+          title={"HTTP"}
           status_code={String(health?.http)}
           status_message={"200/404"}
           status={status_http}
