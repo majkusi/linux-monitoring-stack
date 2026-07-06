@@ -11,12 +11,13 @@ const ServiceRow = ({
   status_message,
   status,
 }: ServiceRowProps) => {
-  const color =
-    status_code != "000" ? "border-ok-status" : "border-error-status";
+  const color = status == "fail" ? "border-error-status" : "border-ok-status";
   return (
     <div className="flex justify-between items-center text-main-text bg-card-background rounded-xl p-3 m-2 border-border-color border">
       <div>
-        <p>{title}</p>
+        <p>
+          {title}: {status_code}
+        </p>
       </div>
       <div className="flex gap-5 items-center">
         <p className="text-muted-text">{status_message}</p>
