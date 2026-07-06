@@ -7,19 +7,19 @@ const ServiceHealth = () => {
       <div className="m-1">
         <ServiceRow
           title={"HTTP:200/404"}
-          status_code={404}
+          status_code={"404"}
           status_message={"200/404"}
           status={"ok"}
         />
         <ServiceRow
           title={"mTLS no cert"}
-          status_code={0}
+          status_code={"0"}
           status_message={"000"}
           status={"rejected"}
         />
         <ServiceRow
           title={"mTLS with cert"}
-          status_code={404}
+          status_code={"404"}
           status_message={"404"}
           status={"reachable"}
         />
