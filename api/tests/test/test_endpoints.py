@@ -28,6 +28,6 @@ def test_http_response(client):
     resp = client.get("/metrics/status/test_results")
     assert resp.status_code == 200
     data = resp.json()
-    assert data[0]["http"] == 404
-    assert data[0]["mtls_no_cert"] == 0
-    assert data[0]["mtls_cert"] == 404
+    assert data["http"] == 404
+    assert data["mtls_no_cert"] == 0
+    assert data["mtls_cert"] == 404
