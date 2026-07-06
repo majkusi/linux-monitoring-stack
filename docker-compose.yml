@@ -79,3 +79,17 @@ services:
       loader:
         condition: service_started
     restart: unless-stopped
+  frontend:
+    image: frontend:latest
+    container_name: frontend
+    ports:
+      - "5173:5173"
+    build:
+      context: ./frontend/monitoring-frontend
+      dockerfile: dockerfile
+    volumes:
+      - ./frontend/monitoring-frontend:/frontend/monitoring-frontend
+    depends_on:
+      api_dashboard:
+        condition: service_started
+    restart: unless-stopped
