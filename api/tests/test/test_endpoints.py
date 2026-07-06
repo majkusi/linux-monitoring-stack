@@ -23,3 +23,11 @@ def test_ram(client):
     assert data[0]["ram_used"] == 5000.0
     assert data[1]["ram_pct"] == 64.0
     assert data[1]["ram_used"] == 5120.0
+
+def test_http_response(client):
+    resp = client.get("/metrics/status/test_results")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data[0]["http"] == 200
+    assert data[0]["mtls_no_cert"] == 000
+    assert data[0]["mtls_cert"] == 404
