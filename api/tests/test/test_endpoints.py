@@ -29,5 +29,5 @@ def test_http_response(client):
     assert resp.status_code == 200
     data = resp.json()
     assert data[0]["http"] == 200
-    assert data[0]["mtls_no_cert"] == 000
+    assert data[0]["mtls_no_cert"] == "000"
     assert data[0]["mtls_cert"] == 404
