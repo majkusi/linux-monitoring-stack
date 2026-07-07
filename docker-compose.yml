@@ -73,6 +73,7 @@ services:
       dockerfile: dockerfile
     environment:
       <<: *db-environment
+      APP_ENV: PROD
     volumes:
       - ./api:/api
     depends_on:
