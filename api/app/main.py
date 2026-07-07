@@ -11,21 +11,27 @@ from models.AvgHourlyDisk import AvgHourlyDisk
 from sql.sql_queries import avg_per_hour, server_uptime_pct, service_health_http
 from fastapi import Depends
 from fastapi.middleware.cors import CORSMiddleware
+from db.fakeDb import FakeDb
 
-db = Connect(
-    user=os.environ["APP_USER"],
-    password=os.environ["APP_USER_PASSWORD"],
-    dsn = os.environ["DB_HOST"] + ":" + os.environ["DB_PORT"] + "/" + os.environ["DB_SERVICE"]
-)
-
-def get_db():
-      return db
+db = None
 
 @asynccontextmanager
-async def lifespan(app:FastAPI):
-    get_db().connect()
+async def lifespan(app: FastAPI):
+    global db
+    if os.environ.get("APP_ENV") == "PROD":
+        db = Connect(
+            user=os.environ["APP_USER"],
+            password=os.environ["APP_USER_PASSWORD"],
+            dsn=os.environ["DB_HOST"] + ":" + os.environ["DB_PORT"] + "/" + os.environ["DB_SERVICE"]
+        )
+        db.connect()
+    else:
+        db = FakeDb()
     yield
-    get_db().close()
+    db.close()
+
+def get_db():
+    return db
 
 app = FastAPI(lifespan=lifespan)
 
