@@ -293,7 +293,7 @@ CI runs on GitHub Actions (each workflow caps `GITHUB_TOKEN` to read-only and ca
 
 ## Design Decisions
 
-**Ephemeral database** — Oracle data is not persisted to a volume. Tables are recreated automatically on each startup via `check_if_table_exists()`. This is intentional for a dev/demo environment; adding a named volume to `docker-compose.yml` would make it persistent.
+**No Oracle data volume** — Oracle's data directory (`/opt/oracle/oradata`) is not mapped to a named/host volume, so the data lives in the container's writable layer. With `restart: unless-stopped` it survives restarts, `stop`/`start`, and host reboots — it is only wiped when the container is removed or recreated (`docker-compose down`, image change). `check_if_table_exists()` (re)creates `METRICS` / `STATUS` only when they are missing — i.e. on a fresh container, not on every startup. Mapping a volume onto `/opt/oracle/oradata` would make it fully persistent.
 
 **All three checks per STATUS row** — Each service-log line records the plain HTTP check plus both mTLS checks and is stored as a single timestamped row with dedicated columns (`HTTP_STATUS`, `MTLS_NO_CERT`, `MTLS_CERT`). This keeps every minute's full health snapshot in one place rather than spread across separate rows.
 
