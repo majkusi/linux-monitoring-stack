@@ -2,6 +2,7 @@ name: front_eslint
 
 on:
   push:
+    branches: [main]
     paths:
       - "frontend/**"
       - ".github/workflows/front_eslint.yml"
@@ -9,6 +10,13 @@ on:
     paths:
       - "frontend/**"
       - ".github/workflows/front_eslint.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   front_eslint:
@@ -23,4 +31,6 @@ jobs:
       - run: npm ci
         working-directory: frontend/monitoring-frontend
       - run: npm run lint
+        working-directory: frontend/monitoring-frontend
+      - run: npm run build
         working-directory: frontend/monitoring-frontend

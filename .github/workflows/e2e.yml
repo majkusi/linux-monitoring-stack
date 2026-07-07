@@ -1,0 +1,65 @@
+name: e2e
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "frontend/**"
+      - "api/**"
+      - ".github/workflows/e2e.yml"
+  pull_request:
+    paths:
+      - "frontend/**"
+      - "api/**"
+      - ".github/workflows/e2e.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+          cache-dependency-path: |
+            frontend/monitoring-frontend/package-lock.json
+            frontend/tests/e2e/package-lock.json
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      # API — webServer w playwright.config.ts odpala `uvicorn main:app`,
+      # więc uvicorn (z fastapi[standard]) musi być zainstalowany.
+      # APP_ENV nieustawione => main.py leci na FakeDb, Oracle niepotrzebne.
+      - run: pip install -r api/requirements.txt
+
+      # deps frontu — playwright startuje jego dev server
+      - run: npm ci
+        working-directory: frontend/monitoring-frontend
+
+      # deps e2e + silniki przeglądarek
+      - run: npm ci
+        working-directory: frontend/tests/e2e
+      - run: npx playwright install --with-deps
+        working-directory: frontend/tests/e2e
+
+      - run: npx playwright test
+        working-directory: frontend/tests/e2e
+
+      # raport zawsze, żeby dało się obejrzeć czemu padło
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: frontend/tests/e2e/playwright-report/
+          retention-days: 7
