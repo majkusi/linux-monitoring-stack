@@ -8,17 +8,17 @@ A three-tier monitoring stack running on Docker Compose. A **monitor** agent col
 
 ## Tech Stack
 
-| Component          | Technology                                       |
-| ------------------ | ------------------------------------------------ |
-| Application server | Apache Tomcat (latest)                           |
-| Monitoring agent   | Bash + curl                                      |
-| Database loader    | Python 3 + python-oracledb                       |
-| REST API           | Python 3 + FastAPI                               |
+| Component          | Technology                                        |
+| ------------------ | ------------------------------------------------- |
+| Application server | Apache Tomcat (latest)                            |
+| Monitoring agent   | Bash + curl                                       |
+| Database loader    | Python 3 + python-oracledb                        |
+| REST API           | Python 3 + FastAPI                                |
 | Frontend           | React + Vite + TypeScript, Tailwind CSS, Chart.js |
-| Database           | Oracle Database Free 23ai (`gvenzl/oracle-free`) |
-| Security           | mTLS with self-signed CA                         |
-| Tests / CI         | pytest, Playwright (e2e), ESLint, GitHub Actions |
-| Orchestration      | Docker Compose                                   |
+| Database           | Oracle Database Free 23ai (`gvenzl/oracle-free`)  |
+| Security           | mTLS with self-signed CA                          |
+| Tests / CI         | pytest, Playwright (e2e), ESLint, GitHub Actions  |
+| Orchestration      | Docker Compose                                    |
 
 ## Project Structure
 
@@ -163,14 +163,14 @@ A FastAPI service (container `api_dashboard`, port **8000**) that reads from Ora
 
 The `lifespan` picks the backend from `APP_ENV`: `PROD` uses the real Oracle pool (`Connect`), anything else falls back to an in-app `FakeDb` stub — so the API can run without a database. Compose sets `APP_ENV=PROD` on `api_dashboard`.
 
-| Method & path                         | Returns                                              |
-| ------------------------------------- | ---------------------------------------------------- |
-| `GET /metrics`                        | Today's rows from `METRICS`, newest first            |
-| `GET /metrics/average/hourly/ram`     | Hourly average RAM (`RAM_PCT`, `RAM_USED`)           |
-| `GET /metrics/average/hourly/cpu`     | Hourly average CPU (`CPU_PCT`)                       |
-| `GET /metrics/average/hourly/disk`    | Hourly average disk (`DISK_PCT`)                     |
-| `GET /metrics/average/uptime`         | Uptime % (`successes`, `total`, `uptime_pct`)        |
-| `GET /metrics/status/test_results`    | Latest `STATUS` row (`http`, `mtls_no_cert`, `mtls_cert`) |
+| Method & path                      | Returns                                                   |
+| ---------------------------------- | --------------------------------------------------------- |
+| `GET /metrics`                     | Today's rows from `METRICS`, newest first                 |
+| `GET /metrics/average/hourly/ram`  | Hourly average RAM (`RAM_PCT`, `RAM_USED`)                |
+| `GET /metrics/average/hourly/cpu`  | Hourly average CPU (`CPU_PCT`)                            |
+| `GET /metrics/average/hourly/disk` | Hourly average disk (`DISK_PCT`)                          |
+| `GET /metrics/average/uptime`      | Uptime % (`successes`, `total`, `uptime_pct`)             |
+| `GET /metrics/status/test_results` | Latest `STATUS` row (`http`, `mtls_no_cert`, `mtls_cert`) |
 
 Interactive docs are auto-generated at `http://localhost:8000/docs`.
 
@@ -292,10 +292,6 @@ CI runs on GitHub Actions (each workflow caps `GITHUB_TOKEN` to read-only and ca
 - `e2e.yml` — Playwright e2e (Node 24 + Python 3.14) on `frontend/**` and `api/**`; runs against the `FakeDb` backend and uploads the HTML report as an artifact.
 
 ## Design Decisions
-
-**No Oracle data volume** — Oracle's data directory (`/opt/oracle/oradata`) is not mapped to a named/host volume, so the data lives in the container's writable layer. With `restart: unless-stopped` it survives restarts, `stop`/`start`, and host reboots — it is only wiped when the container is removed or recreated (`docker-compose down`, image change). `check_if_table_exists()` (re)creates `METRICS` / `STATUS` only when they are missing — i.e. on a fresh container, not on every startup. Mapping a volume onto `/opt/oracle/oradata` would make it fully persistent.
-
-**All three checks per STATUS row** — Each service-log line records the plain HTTP check plus both mTLS checks and is stored as a single timestamped row with dedicated columns (`HTTP_STATUS`, `MTLS_NO_CERT`, `MTLS_CERT`). This keeps every minute's full health snapshot in one place rather than spread across separate rows.
 
 **Self-signed CA** — No public CA is used. Both containers mount `certs/generated/` and trust the same `ca.crt`. The CA private key (`ca.key`) is only needed to sign certs and is not mounted at runtime.
 
