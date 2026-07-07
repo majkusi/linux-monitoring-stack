@@ -17,7 +17,7 @@ A three-tier monitoring stack running on Docker Compose. A **monitor** agent col
 | Frontend           | React + Vite + TypeScript, Tailwind CSS, Chart.js |
 | Database           | Oracle Database Free 23ai (`gvenzl/oracle-free`) |
 | Security           | mTLS with self-signed CA                         |
-| Tests / CI         | pytest + ESLint + GitHub Actions                 |
+| Tests / CI         | pytest, Playwright (e2e), ESLint, GitHub Actions |
 | Orchestration      | Docker Compose                                   |
 
 ## Project Structure
@@ -26,14 +26,16 @@ A three-tier monitoring stack running on Docker Compose. A **monitor** agent col
 linux-monitoring-stack/
 ├── .github/
 │   └── workflows/
-│       ├── api_test.yml         # CI — pytest, runs on api/** changes
-│       └── front_eslint.yml     # CI — ESLint, runs on frontend/** changes
+│       ├── api_test.yml         # CI — pytest (FakeDb, no Oracle)
+│       ├── front_eslint.yml     # CI — ESLint + build (tsc + vite)
+│       └── e2e.yml              # CI — Playwright e2e (FakeDb backend)
 ├── api/
 │   ├── dockerfile
 │   ├── requirements.txt
 │   ├── app/
-│   │   ├── main.py              # FastAPI app, endpoints, lifespan, CORS
+│   │   ├── main.py              # FastAPI app, endpoints, lifespan, CORS, APP_ENV gate
 │   │   ├── db/connect.py        # Oracle connection pool wrapper (Connect)
+│   │   ├── db/fakeDb.py         # in-app stub used when APP_ENV != PROD
 │   │   ├── models/              # Pydantic response models
 │   │   └── sql/sql_queries.py   # query builders for the endpoints
 │   └── tests/
@@ -44,12 +46,19 @@ linux-monitoring-stack/
 │   ├── generate-certs.sh        # generates CA, server, and client certs
 │   └── generated/               # output dir (gitignored)
 ├── frontend/
-│   └── monitoring-frontend/     # React + Vite + TS dashboard
-│       ├── src/
-│       │   ├── App.tsx
-│       │   └── components/       # Header, StatCard, MetricsChart, ServiceHealth, ServiceRow
-│       ├── package.json
-│       └── vite.config.ts
+│   ├── monitoring-frontend/     # React + Vite + TS dashboard (containerized)
+│   │   ├── dockerfile
+│   │   ├── .env                 # VITE_API_URL — API base URL
+│   │   ├── src/
+│   │   │   ├── App.tsx
+│   │   │   ├── config.ts        # exports API_URL from import.meta.env
+│   │   │   └── components/       # Header, StatCard, MetricsChart, ServiceHealth, ServiceRow
+│   │   ├── package.json
+│   │   └── vite.config.ts
+│   └── tests/
+│       └── e2e/                 # Playwright e2e (boots front + API, FakeDb backend)
+│           ├── playwright.config.ts
+│           └── tests/e2e/dashboard.spec.ts
 ├── loader/
 │   ├── dockerfile
 │   ├── requirements.txt
@@ -83,7 +92,7 @@ linux-monitoring-stack/
 - Docker + Docker Compose
 - OpenSSL (for cert generation)
 - Git Bash or Linux shell
-- Node.js 24+ (only for the frontend)
+- Node.js 24+ (only for running the frontend or e2e tests outside Docker)
 
 ### 1. Configure environment
 
@@ -93,7 +102,10 @@ Create a `.env` file in the project root:
 ORACLE_PASSWORD=your_oracle_sys_password
 APP_USER=app_user
 APP_USER_PASSWORD=your_app_user_password
+APP_ENV=PROD
 ```
+
+`APP_ENV=PROD` makes the API read from the real Oracle pool; unset (or any other value) makes it fall back to the in-app `FakeDb` stub.
 
 ### 2. Generate mTLS certificates
 
@@ -110,7 +122,7 @@ This creates a local CA and signs two certificates: `tomcat` (server) and `monit
 docker-compose up --build -d
 ```
 
-The `loader` container waits for Oracle to pass its healthcheck before starting. First startup takes a few minutes while Oracle initializes.
+The `loader` container waits for Oracle to pass its healthcheck before starting. First startup takes a few minutes while Oracle initializes. Once up, the dashboard is on `http://localhost:5173` and the API on `http://localhost:8000`.
 
 ### 4. Verify
 
@@ -149,6 +161,8 @@ Reads the log files every 60 seconds (both today's and yesterday's, to handle th
 
 A FastAPI service (container `api_dashboard`, port **8000**) that reads from Oracle through a `python-oracledb` connection pool and returns the data as JSON. The pool is opened and closed in the FastAPI `lifespan`, and exposed to the route handlers via a `get_db` dependency. CORS is enabled for the frontend origin `http://localhost:5173` (GET only).
 
+The `lifespan` picks the backend from `APP_ENV`: `PROD` uses the real Oracle pool (`Connect`), anything else falls back to an in-app `FakeDb` stub — so the API can run without a database. Compose sets `APP_ENV=PROD` on `api_dashboard`.
+
 | Method & path                         | Returns                                              |
 | ------------------------------------- | ---------------------------------------------------- |
 | `GET /metrics`                        | Today's rows from `METRICS`, newest first            |
@@ -162,7 +176,9 @@ Interactive docs are auto-generated at `http://localhost:8000/docs`.
 
 ### frontend
 
-A React + Vite + TypeScript dashboard (`frontend/monitoring-frontend/`) styled with Tailwind CSS. It polls the API every 60 seconds and renders CPU / RAM / disk / uptime stat cards, a Chart.js line chart of today's metrics, and a service-health panel. Not containerized yet — run it locally:
+A React + Vite + TypeScript dashboard (`frontend/monitoring-frontend/`) styled with Tailwind CSS. It polls the API every 60 seconds and renders CPU / RAM / disk / uptime stat cards, a Chart.js line chart of today's metrics, and a live service-health panel driven by `/metrics/status/test_results`.
+
+It runs as a container in the stack (service `frontend`, port **5173**, `depends_on` the API), so `docker-compose up` brings it up with everything else. The API base URL comes from `VITE_API_URL` (see `.env`) via `src/config.ts`, so re-pointing the dashboard is a one-line change. To run it standalone instead:
 
 ```bash
 cd frontend/monitoring-frontend
@@ -170,7 +186,7 @@ npm install
 npm run dev
 ```
 
-Opens on `http://localhost:5173` (the origin whitelisted by the API's CORS config).
+Either way it serves on `http://localhost:5173` (the origin whitelisted by the API's CORS config).
 
 ### mTLS
 
@@ -253,19 +269,27 @@ FETCH FIRST 5 ROWS ONLY;
 
 ## Tests & CI
 
-The API has unit tests (`api/tests/`) built on **pytest** and FastAPI's `TestClient`. The Oracle dependency is swapped out at test time via `app.dependency_overrides[get_db]`, which injects a `FakeDb` stub (`tests/misc/fakeDb.py`) returning canned rows — so the tests run **without a live Oracle instance**. Environment variables that `main.py` reads at import time are set in `conftest.py` before the app is imported.
-
-Run them locally:
+**API unit tests** (`api/tests/`) — built on **pytest** and FastAPI's `TestClient`. The Oracle dependency is swapped out via `app.dependency_overrides[get_db]`, which injects a `FakeDb` stub (`tests/misc/fakeDb.py`) returning canned rows — so they run **without a live Oracle instance**. The env vars `main.py` needs are set in `conftest.py` before the app is imported.
 
 ```bash
 cd api
 python -m pytest -v
 ```
 
-CI runs on GitHub Actions:
+**End-to-end tests** (`frontend/tests/e2e/`) — **Playwright** drives the dashboard in Chromium / Firefox / WebKit and asserts the rendered stat cards, chart, and service-health panel. `playwright.config.ts` boots the frontend dev server and the API before running; the API starts with the default `APP_ENV` (the `FakeDb` stub), so **no Oracle is needed** and the assertions stay deterministic.
 
-- `.github/workflows/api_test.yml` — installs `api/requirements.txt` and runs `pytest` (Python 3.14) on any change under `api/**`. Because the database is stubbed, no Oracle service is required.
-- `.github/workflows/front_eslint.yml` — runs `npm ci` + `npm run lint` (Node 24) on any change under `frontend/**`.
+```bash
+cd frontend/tests/e2e
+npm install
+npx playwright install
+npx playwright test
+```
+
+CI runs on GitHub Actions (each workflow caps `GITHUB_TOKEN` to read-only and cancels superseded runs):
+
+- `api_test.yml` — `pytest` (Python 3.14, pip cached) on `api/**`. Database stubbed, so no Oracle service.
+- `front_eslint.yml` — `npm ci` + `npm run lint` + `npm run build` (`tsc` + `vite build`, Node 24) on `frontend/**`.
+- `e2e.yml` — Playwright e2e (Node 24 + Python 3.14) on `frontend/**` and `api/**`; runs against the `FakeDb` backend and uploads the HTML report as an artifact.
 
 ## Design Decisions
 
@@ -281,7 +305,7 @@ CI runs on GitHub Actions:
 
 ### Infrastructure
 
-- [x] CI — GitHub Actions (pytest for the API, ESLint for the frontend)
+- [x] CI — GitHub Actions (pytest, frontend lint + build, Playwright e2e)
 - [x] Log cleanup — `log_cleanup.sh` deletes logs older than 7 days (compression still TODO)
 - [ ] `init.sh` — single script setup (`.env`, certs, `docker-compose up`)
 - [ ] Nginx reverse proxy container (SSL termination, forward to Tomcat)
@@ -297,8 +321,9 @@ CI runs on GitHub Actions:
 ### Frontend
 
 - [x] React dashboard — Chart.js CPU/RAM/disk chart, stat cards, uptime, service-health panel
-- [ ] Dockerize the frontend and add it to `docker-compose.yml`
-- [ ] Wire the ServiceHealth panel to `/metrics/status/test_results` (currently static)
+- [x] Dockerize the frontend and add it to `docker-compose.yml`
+- [x] Wire the ServiceHealth panel to `/metrics/status/test_results`
+- [x] Configurable API URL (`VITE_API_URL` + `src/config.ts`) and Playwright e2e
 
 ### Database
 
