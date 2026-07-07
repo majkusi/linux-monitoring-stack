@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Chart from "chart.js/auto";
+import { API_URL } from "../config";
 
 interface LineChartData {
   time_stamp: string;
@@ -13,11 +14,9 @@ const MetricsChart = () => {
   const [chartData, setChartData] = useState<LineChartData[]>([]);
   const chartRef = useRef<Chart | null>(null);
 
-  const url = "http://localhost:8000/";
-
   useEffect(() => {
     const fetchData = () => {
-      fetch(url + "metrics").then((res) =>
+      fetch(API_URL + "metrics").then((res) =>
         res.json().then((json) => {
           setChartData(json);
         }),

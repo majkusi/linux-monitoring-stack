@@ -3,6 +3,7 @@ import StatCard from "./components/StatCard";
 import Header from "./components/Header";
 import MetricsChart from "./components/MetricsChart";
 import ServiceHealth from "./components/ServiceHealth";
+import { API_URL } from "./config";
 
 interface StatResponse {
   time_stamp: string;
@@ -24,18 +25,17 @@ const App = () => {
   const [resources, setResources] = useState<StatResponse[]>([]);
   const [status, setStatus] = useState<StatusResponse>();
   const [dataIsLoaded, setDataIsLoaded] = useState(false);
-  const url = "http://localhost:8000/";
 
   useEffect(() => {
     const fetchStatus = () => {
-      fetch(url + "metrics/average/uptime")
+      fetch(API_URL + "metrics/average/uptime")
         .then((res) => res.json())
         .then((json) => {
           setStatus(json);
         });
     };
     const fetchResources = () => {
-      fetch(url + "metrics")
+      fetch(API_URL + "metrics")
         .then((res) => res.json())
         .then((json) => {
           setResources(json);

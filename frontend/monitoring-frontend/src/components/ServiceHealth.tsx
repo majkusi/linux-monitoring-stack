@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import ServiceRow from "./ServiceRow";
+import { API_URL } from "../config";
 
 interface HealthResponse {
   http: number;
@@ -9,10 +10,9 @@ interface HealthResponse {
 
 const ServiceHealth = () => {
   const [health, setHealth] = useState<HealthResponse>();
-  const url = "http://localhost:8000/";
   useEffect(() => {
     const fetchHealth = () => {
-      fetch(url + "metrics/status/test_results")
+      fetch(API_URL + "metrics/status/test_results")
         .then((res) => res.json())
         .then((json) => {
           setHealth(json);
